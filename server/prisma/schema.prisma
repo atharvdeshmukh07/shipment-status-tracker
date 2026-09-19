@@ -1,0 +1,68 @@
+generator client {
+  provider      = "prisma-client-js"
+  // native is for this laptop, the debian one is what Render builds on.
+  // Without it the deploy builds fine and then dies looking for a query engine.
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Shipment {
+  id           String @id @default(uuid()) @db.Uuid
+  referenceNo  String @map("reference_no")
+  // Same reference with the slashes and case stripped out. This is the one
+  // that carries the unique constraint and the one search runs against.
+  referenceKey String @unique @map("reference_key")
+
+  houseBlNo       String? @map("house_bl_no")
+  masterBlNo      String? @map("master_bl_no")
+  mode            String
+  originPort      String  @map("origin_port")
+  destinationPort String  @map("destination_port")
+  consignee       String
+  incoterm        String?
+
+  // Duplicated from the last event so the list page does not need a join per
+  // row. Written in the same transaction as the event, never on its own.
+  currentStatus String @map("current_status")
+
+  // Date, not a timestamp. A delivery due on the 14th is due on the 14th
+  // wherever you happen to be reading it.
+  eta DateTime? @db.Date
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  // Bumped on every status change, checked in the WHERE clause so two people
+  // moving the same file at once cannot silently overwrite each other.
+  version Int @default(1)
+
+  events ShipmentEvent[]
+
+  @@index([currentStatus])
+  @@index([createdAt(sort: Desc), id(sort: Desc)])
+  @@map("shipments")
+}
+
+// Append only. There is no update or delete path for this table anywhere in
+// the API, which is the whole point of keeping it separate.
+model ShipmentEvent {
+  id Int @id @default(autoincrement())
+
+  shipmentId String  @map("shipment_id") @db.Uuid
+  fromStatus String? @map("from_status")
+  toStatus   String  @map("to_status")
+  remarks    String?
+  actor      String  @default("ops")
+
+  occurredAt DateTime @default(now()) @map("occurred_at") @db.Timestamptz(3)
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@index([shipmentId, occurredAt, id])
+  @@map("shipment_events")
+}
