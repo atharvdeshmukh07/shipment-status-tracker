@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    env:
+      # prisma generate reads the datasource block, so these have to resolve to
+      # something that parses. Nothing here talks to a real database — the tests
+      # are pure domain logic with no queries in them.
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci"
+      DIRECT_URL: "postgresql://ci:ci@localhost:5432/ci"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - run: npm ci
+        working-directory: server
+
+      # Has to come before typecheck. The Prisma client's types do not exist
+      # until this runs, so tsc fails on every import of it otherwise.
+      - run: npx prisma generate
+        working-directory: server
+
+      - run: npm run typecheck
+        working-directory: server
+
+      - run: npm test
+        working-directory: server
