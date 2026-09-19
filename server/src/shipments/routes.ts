@@ -1,18 +1,16 @@
 import { Router } from "express";
 import { presentEvent, presentShipment } from "./present.js";
-import { idParam, listQuery, newShipment } from "./schemas.js";
-import { legalNextStatuses, type Stage } from "../domain/status.js";
+import { idParam, listQuery, newShipment, statusChange } from "./schemas.js";
 import {
   createShipment,
   findShipment,
   listEvents,
   listShipments,
+  moveShipment,
+  nextStatusesFor,
 } from "./store.js";
 
 export const shipmentRoutes = Router();
-
-// Express 5 passes a rejected promise to the error handler on its own, so the
-// handlers below stay free of try/catch that does nothing but rethrow.
 
 shipmentRoutes.post("/", async (req, res) => {
   const body = newShipment.parse(req.body);
@@ -34,12 +32,9 @@ shipmentRoutes.get("/:id", async (req, res) => {
   const { id } = idParam.parse(req.params);
   const shipment = await findShipment(id);
 
-  // The dropdown on the detail page is built from this, so the UI never offers
-  // a move the server is only going to refuse.
-  const from = shipment.currentStatus as Stage;
   res.json({
     ...presentShipment(shipment),
-    nextStatuses: legalNextStatuses(from),
+    nextStatuses: await nextStatusesFor(shipment),
   });
 });
 
@@ -47,4 +42,11 @@ shipmentRoutes.get("/:id/events", async (req, res) => {
   const { id } = idParam.parse(req.params);
   const events = await listEvents(id);
   res.json({ data: events.map(presentEvent) });
+});
+
+shipmentRoutes.post("/:id/status", async (req, res) => {
+  const { id } = idParam.parse(req.params);
+  const change = statusChange.parse(req.body);
+  const moved = await moveShipment(id, change);
+  res.json(presentShipment(moved));
 });

@@ -2,12 +2,15 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../db.js";
 import { ApiError } from "../errors.js";
 import { escapeLike, referenceKey } from "../domain/reference.js";
-import type { Stage } from "../domain/status.js";
+import {
+  IllegalMove,
+  assertMove,
+  legalNextStatuses,
+  type Stage,
+} from "../domain/status.js";
 import type { ShipmentRow } from "./present.js";
-import type { ListQuery, NewShipment } from "./schemas.js";
+import type { ListQuery, NewShipment, StatusChange } from "./schemas.js";
 
-// Prisma throws a tagged object rather than a typed error class you can
-// instanceof across module boundaries reliably, so check the code.
 function isDuplicateKey(err: unknown): boolean {
   return (
     typeof err === "object" &&
@@ -37,8 +40,6 @@ export async function createShipment(input: NewShipment) {
         },
       });
 
-      // The file opening is itself an event. Without this the timeline of a
-      // brand new shipment is empty, which looks like the feature is broken.
       await tx.shipmentEvent.create({
         data: {
           shipmentId: shipment.id,
@@ -74,9 +75,6 @@ export async function listShipments(query: ListQuery) {
     filters.push(Prisma.sql`s.current_status = ${query.status}`);
   }
 
-  // Search the normalised key, so NGK/IMP/2026/0431 and ngk-imp-2026-0431 both
-  // land on the same file. ESCAPE is there because % and _ in what the operator
-  // typed would otherwise behave as wildcards.
   if (query.q) {
     const prefix = `${escapeLike(referenceKey(query.q))}%`;
     filters.push(
@@ -87,8 +85,6 @@ export async function listShipments(query: ListQuery) {
   const where = Prisma.join(filters, " AND ");
   const direction = query.dir === "asc" ? Prisma.sql`ASC` : Prisma.sql`DESC`;
 
-  // s.id is in the ORDER BY as a tiebreak. Seeded rows share a created_at down
-  // to the millisecond, and without it page 2 can repeat a row from page 1.
   const rows = await prisma.$queryRaw<ShipmentRow[]>`
     SELECT s.id,
            s.reference_no                        AS "referenceNo",
@@ -110,8 +106,6 @@ export async function listShipments(query: ListQuery) {
      LIMIT ${query.limit} OFFSET ${query.offset}
   `;
 
-  // ::int and not ::bigint. count() gives a bigint, and a bigint walks straight
-  // out of res.json() as a TypeError.
   const tally = await prisma.$queryRaw<{ total: number }[]>`
     SELECT count(*)::int AS total FROM shipments s WHERE ${where}
   `;
@@ -133,5 +127,75 @@ export async function listEvents(id: string) {
   return prisma.shipmentEvent.findMany({
     where: { shipmentId: id },
     orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
+  });
+}
+
+type Tx = Prisma.TransactionClient;
+
+async function brokeOutOf(tx: Tx, shipmentId: string): Promise<Stage | null> {
+  const breakage = await tx.shipmentEvent.findFirst({
+    where: { shipmentId, toStatus: "EXCEPTION" },
+    orderBy: [{ occurredAt: "desc" }, { id: "desc" }],
+    select: { fromStatus: true },
+  });
+  return (breakage?.fromStatus as Stage | undefined) ?? null;
+}
+
+export async function nextStatusesFor(shipment: {
+  id: string;
+  currentStatus: string;
+}) {
+  const from = shipment.currentStatus as Stage;
+  if (from !== "EXCEPTION") return legalNextStatuses(from);
+  return legalNextStatuses(from, await brokeOutOf(prisma, shipment.id));
+}
+
+export async function moveShipment(id: string, change: StatusChange) {
+  return prisma.$transaction(async (tx) => {
+    const shipment = await tx.shipment.findUnique({ where: { id } });
+    if (!shipment) throw new ApiError("NOT_FOUND", "no shipment with that id");
+
+    const from = shipment.currentStatus as Stage;
+    const fallback = from === "EXCEPTION" ? await brokeOutOf(tx, id) : null;
+
+    try {
+      assertMove(from, change.toStatus, fallback);
+    } catch (err) {
+      if (err instanceof IllegalMove) {
+        throw new ApiError("ILLEGAL_TRANSITION", err.message, {
+          from: err.from,
+          to: err.to,
+          allowed: err.allowed,
+        });
+      }
+      throw err;
+    }
+
+    const moved = await tx.shipment.updateMany({
+      where: { id, version: change.expectedVersion },
+      data: { currentStatus: change.toStatus, version: { increment: 1 } },
+    });
+
+    if (moved.count === 0) {
+      throw new ApiError(
+        "VERSION_CONFLICT",
+        "someone else moved this file while you had it open",
+        {
+          currentStatus: shipment.currentStatus,
+          version: shipment.version,
+        }
+      );
+    }
+
+    await tx.shipmentEvent.create({
+      data: {
+        shipmentId: id,
+        fromStatus: from,
+        toStatus: change.toStatus,
+        remarks: change.remarks ?? null,
+      },
+    });
+
+    return tx.shipment.findUniqueOrThrow({ where: { id } });
   });
 }
