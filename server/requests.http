@@ -1,0 +1,94 @@
+# Open this in VS Code with the REST Client extension and hit "Send Request"
+# above each block. Saves needing the frontend to poke at any of this.
+
+@base = http://localhost:4000/api/v1
+
+### is it alive
+GET http://localhost:4000/health
+
+### the whole book
+GET {{base}}/shipments
+
+### only the ones stuck in customs
+GET {{base}}/shipments?status=CUSTOMS_HOLD
+
+### find a file by reference, punctuation and case do not matter
+GET {{base}}/shipments?q=ngk-imp-2026-0431
+
+### a status that does not exist should be rejected, not come back empty
+GET {{base}}/shipments?status=PENDING
+
+### second page
+GET {{base}}/shipments?limit=5&offset=5&sort=eta&dir=asc
+
+### open a new file
+POST {{base}}/shipments
+Content-Type: application/json
+
+{
+  "referenceNo": "NGK/IMP/2026/0492",
+  "houseBlNo": "NGKH2604922",
+  "masterBlNo": "MAEU771990412",
+  "mode": "SEA_FCL",
+  "originPort": "aejea",
+  "destinationPort": "innsa",
+  "consignee": "Test Importer Pvt Ltd",
+  "incoterm": "CIF",
+  "eta": "2026-10-14"
+}
+
+### same reference again, should come back 409 DUPLICATE_REFERENCE
+POST {{base}}/shipments
+Content-Type: application/json
+
+{
+  "referenceNo": "ngk-imp-2026-0492",
+  "mode": "SEA_FCL",
+  "originPort": "AEJEA",
+  "destinationPort": "INNSA",
+  "consignee": "Test Importer Pvt Ltd"
+}
+
+### one file — paste an id from the list above
+@id = paste-an-id-here
+
+GET {{base}}/shipments/{{id}}
+
+### its history
+GET {{base}}/shipments/{{id}}/events
+
+### move it on
+POST {{base}}/shipments/{{id}}/status
+Content-Type: application/json
+
+{
+  "toStatus": "DOCS_RECEIVED",
+  "expectedVersion": 1
+}
+
+### an illegal jump, should be 409 ILLEGAL_TRANSITION with the allowed list
+POST {{base}}/shipments/{{id}}/status
+Content-Type: application/json
+
+{
+  "toStatus": "DELIVERED",
+  "expectedVersion": 2
+}
+
+### a hold with no reason, should be 422 on the remarks field
+POST {{base}}/shipments/{{id}}/status
+Content-Type: application/json
+
+{
+  "toStatus": "CUSTOMS_HOLD",
+  "expectedVersion": 2
+}
+
+### a stale version, should be 409 VERSION_CONFLICT
+POST {{base}}/shipments/{{id}}/status
+Content-Type: application/json
+
+{
+  "toStatus": "IN_TRANSIT",
+  "expectedVersion": 1
+}
