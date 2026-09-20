@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+/* Tailwind 4 takes its theme from here. There is no tailwind.config file in
+   this version and adding one does nothing, which is a confusing hour to lose.
+
+   The ink scale is the chrome — header, buttons, borders, type. It is deep and
+   desaturated on purpose, because the only things on this screen allowed to
+   mean something by their colour are the six status tones, and a brand colour
+   competing with those would make a held file harder to spot, not easier. */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-ink-950: #071620;
+  --color-ink-900: #0b2130;
+  --color-ink-800: #113148;
+  --color-ink-700: #1b4661;
+  --color-ink-600: #4c6f85;
+  --color-ink-500: #6b8b9e;
+  --color-ink-400: #8da9b8;
+  --color-ink-300: #b4c8d3;
+  --color-ink-200: #d2e0e8;
+  --color-ink-100: #e6eff3;
+  --color-ink-50: #f2f7f9;
+
+  --color-page: #eef3f6;
+}
+
+html {
+  background-color: var(--color-page);
+  color: var(--color-ink-900);
+  -webkit-font-smoothing: antialiased;
+}
