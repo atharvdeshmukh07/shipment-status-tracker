@@ -20,10 +20,10 @@ export function StageTrack({ current, cameFrom }: { current: Stage; cameFrom: St
     current === 'EXCEPTION'
       ? 'bg-red-500 ring-red-500/20'
       : current === 'CANCELLED'
-        ? 'bg-ink-400 ring-ink-400/20'
+        ? 'bg-faint ring-faint/20'
         : current === 'CUSTOMS_HOLD'
           ? 'bg-amber-500 ring-amber-500/25'
-          : 'bg-ink-900 ring-ink-900/15'
+          : 'bg-body ring-body/15'
 
   const aside =
     current === 'CUSTOMS_HOLD'
@@ -36,10 +36,10 @@ export function StageTrack({ current, cameFrom }: { current: Stage; cameFrom: St
 
   const asideTone =
     current === 'EXCEPTION'
-      ? 'border-red-200 bg-red-50 text-red-800'
+      ? 'border-red-200 bg-red-50 text-red-800 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300'
       : current === 'CUSTOMS_HOLD'
-        ? 'border-amber-200 bg-amber-50 text-amber-900'
-        : 'border-ink-200 bg-ink-50 text-ink-700'
+        ? 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300'
+        : 'border-line bg-raised text-muted'
 
   return (
     <div>
@@ -53,27 +53,23 @@ export function StageTrack({ current, cameFrom }: { current: Stage; cameFrom: St
                 <div className="flex w-full items-center">
                   <span
                     className={`h-0.5 flex-1 rounded-full ${
-                      index === 0 ? 'bg-transparent' : done || here ? 'bg-ink-900' : 'bg-ink-200'
+                      index === 0 ? 'bg-transparent' : done || here ? 'bg-body' : 'bg-line'
                     }`}
                   />
                   <span
                     className={`h-2.5 w-2.5 shrink-0 rounded-full ${
-                      here ? `${hereTone} ring-4` : done ? 'bg-ink-900' : 'bg-ink-200'
+                      here ? `${hereTone} ring-4` : done ? 'bg-body' : 'bg-line'
                     }`}
                   />
                   <span
                     className={`h-0.5 flex-1 rounded-full ${
-                      index === last ? 'bg-transparent' : done ? 'bg-ink-900' : 'bg-ink-200'
+                      index === last ? 'bg-transparent' : done ? 'bg-body' : 'bg-line'
                     }`}
                   />
                 </div>
                 <span
                   className={`mt-2.5 px-1 text-center text-[11px] leading-tight ${
-                    here
-                      ? 'font-semibold text-ink-900'
-                      : done
-                        ? 'text-ink-700'
-                        : 'text-ink-400'
+                    here ? 'font-semibold text-body' : done ? 'text-muted' : 'text-faint'
                   }`}
                 >
                   {TRACK_LABEL[stage]}
@@ -84,9 +80,7 @@ export function StageTrack({ current, cameFrom }: { current: Stage; cameFrom: St
         </ol>
       </div>
 
-      {aside && (
-        <p className={`mt-4 rounded-md border px-3 py-2 text-sm ${asideTone}`}>{aside}</p>
-      )}
+      {aside && <p className={`mt-4 rounded-md border px-3 py-2 text-sm ${asideTone}`}>{aside}</p>}
     </div>
   )
 }

@@ -11,8 +11,8 @@ import { ErrorNote } from '../components/ErrorNote'
 function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div>
-      <dt className="text-[11px] font-semibold uppercase tracking-wider text-ink-500">{label}</dt>
-      <dd className={`mt-1 text-sm text-ink-900 ${mono ? 'font-mono text-[13px]' : ''}`}>
+      <dt className="text-[11px] font-semibold uppercase tracking-wider text-muted">{label}</dt>
+      <dd className={`mt-1 text-sm text-body ${mono ? 'font-mono text-[13px]' : ''}`}>
         {value}
       </dd>
     </div>
@@ -29,7 +29,7 @@ export function ShipmentDetail() {
   const [remarks, setRemarks] = useState('')
 
   if (shipment.isPending) {
-    return <p className="text-sm text-ink-600">Loading.</p>
+    return <p className="text-sm text-muted">Loading.</p>
   }
 
   if (shipment.isError) {
@@ -54,7 +54,7 @@ export function ShipmentDetail() {
   const late = due?.includes('late') ?? false
 
   const fieldClass =
-    'rounded-md border border-ink-300 bg-white px-3 py-1.5 text-sm text-ink-900 shadow-sm placeholder:text-ink-400 focus:border-ink-700 focus:outline-none focus:ring-1 focus:ring-ink-700'
+    'rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-body shadow-sm placeholder:text-faint focus:border-muted focus:outline-none focus:ring-1 focus:ring-muted'
 
   function submit(event: FormEvent) {
     event.preventDefault()
@@ -80,20 +80,20 @@ export function ShipmentDetail() {
 
   return (
     <div className="space-y-5">
-      <Link to="/" className="inline-block text-sm text-ink-600 hover:text-ink-900">
+      <Link to="/" className="inline-block text-sm text-muted hover:text-body">
         ← All files
       </Link>
 
-      <div className="overflow-hidden rounded-lg border border-ink-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-line bg-surface shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3 px-5 pt-5">
           <div>
-            <h1 className="font-mono text-lg font-semibold tracking-tight text-ink-900">
+            <h1 className="font-mono text-lg font-semibold tracking-tight text-body">
               {file.referenceNo}
             </h1>
-            <p className="mt-0.5 text-sm text-ink-600">
+            <p className="mt-0.5 text-sm text-muted">
               {file.consignee}
-              <span className="mx-1.5 text-ink-300">·</span>
-              <span className="font-mono text-[13px] text-ink-700">
+              <span className="mx-1.5 text-faint">·</span>
+              <span className="font-mono text-[13px] text-body">
                 {file.originPort} → {file.destinationPort}
               </span>
             </p>
@@ -105,15 +105,19 @@ export function ShipmentDetail() {
           <StageTrack current={file.currentStatus} cameFrom={cameFrom} />
         </div>
 
-        <p className="mt-4 border-y border-ink-100 bg-ink-50 px-5 py-2.5 text-sm text-ink-700">
-          At <span className="font-medium text-ink-900">{STAGE_LABEL[file.currentStatus]}</span>
+        <p className="mt-4 border-y border-hair bg-raised px-5 py-2.5 text-sm text-body">
+          At <span className="font-medium text-body">{STAGE_LABEL[file.currentStatus]}</span>
           {sittingFor ? ` for ${sittingFor}` : ''}
-          <span className="mx-1.5 text-ink-300">·</span>
+          <span className="mx-1.5 text-faint">·</span>
           {file.eta ? (
             <>
               ETA <span className="tabular-nums">{shortDate(file.eta)}</span>
               {due && (
-                <span className={late ? ' font-semibold text-red-600' : ' text-ink-500'}>
+                <span
+                  className={
+                    late ? ' font-semibold text-red-600 dark:text-red-400' : ' text-muted'
+                  }
+                >
                   {' '}
                   ({due})
                 </span>
@@ -132,13 +136,13 @@ export function ShipmentDetail() {
         </dl>
       </div>
 
-      <div className="rounded-lg border border-ink-200 bg-white p-5 shadow-sm">
-        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-ink-500">
+      <div className="rounded-lg border border-line bg-surface p-5 shadow-sm">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted">
           Move this file
         </h2>
 
         {file.nextStatuses.length === 0 ? (
-          <p className="mt-3 text-sm text-ink-600">
+          <p className="mt-3 text-sm text-muted">
             This file is closed. Nothing moves on from {STAGE_LABEL[file.currentStatus]}.
           </p>
         ) : (
@@ -162,7 +166,7 @@ export function ShipmentDetail() {
               <button
                 type="submit"
                 disabled={!toStatus || move.isPending || (reasonRequired && !remarks.trim())}
-                className="rounded-md bg-ink-900 px-3.5 py-1.5 text-sm font-medium text-white shadow-sm transition hover:bg-ink-800 disabled:opacity-40"
+                className="rounded-md bg-action px-3.5 py-1.5 text-sm font-medium text-on-action shadow-sm transition hover:bg-action-2 disabled:opacity-40"
               >
                 {move.isPending ? 'Saving…' : 'Record it'}
               </button>
@@ -178,7 +182,7 @@ export function ShipmentDetail() {
                 className={`w-full ${fieldClass}`}
               />
               {reasonRequired && (
-                <p className="mt-1.5 text-xs text-amber-700">
+                <p className="mt-1.5 text-xs text-amber-700 dark:text-amber-400">
                   A hold or an exception with no reason on it is useless to whoever picks this
                   file up next.
                 </p>
@@ -190,10 +194,10 @@ export function ShipmentDetail() {
         )}
       </div>
 
-      <div className="rounded-lg border border-ink-200 bg-white p-5 shadow-sm">
-        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-ink-500">History</h2>
+      <div className="rounded-lg border border-line bg-surface p-5 shadow-sm">
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted">History</h2>
 
-        {events.isPending && <p className="mt-3 text-sm text-ink-600">Loading.</p>}
+        {events.isPending && <p className="mt-3 text-sm text-muted">Loading.</p>}
         <ErrorNote error={events.error} />
 
         {/* Newest first. Somebody opening this file wants to know what just
@@ -201,7 +205,7 @@ export function ShipmentDetail() {
         <ol className="mt-4 space-y-0">
           {[...history].reverse().map((event, index) => (
             <li key={event.id} className="flex gap-4">
-              <div className="w-28 shrink-0 pt-0.5 text-xs tabular-nums text-ink-500">
+              <div className="w-28 shrink-0 pt-0.5 text-xs tabular-nums text-muted">
                 {whenStamp(event.occurredAt)}
               </div>
 
@@ -210,18 +214,18 @@ export function ShipmentDetail() {
               <div className="relative flex flex-col items-center">
                 <span
                   className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
-                    index === 0 ? 'bg-ink-900' : 'bg-ink-300'
+                    index === 0 ? 'bg-body' : 'bg-line'
                   }`}
                 />
-                <span className="w-px flex-1 bg-ink-100" />
+                <span className="w-px flex-1 bg-hair" />
               </div>
 
               <div className="pb-5 text-sm">
-                <div className="text-ink-900">
+                <div className="text-body">
                   {event.fromStatus ? (
                     <>
-                      <span className="text-ink-600">{STAGE_LABEL[event.fromStatus]}</span>
-                      <span className="mx-1.5 text-ink-300">→</span>
+                      <span className="text-muted">{STAGE_LABEL[event.fromStatus]}</span>
+                      <span className="mx-1.5 text-faint">→</span>
                       <span className="font-medium">{STAGE_LABEL[event.toStatus]}</span>
                     </>
                   ) : (
@@ -231,7 +235,7 @@ export function ShipmentDetail() {
                     </>
                   )}
                 </div>
-                {event.remarks && <div className="mt-1 text-ink-600">{event.remarks}</div>}
+                {event.remarks && <div className="mt-1 text-muted">{event.remarks}</div>}
               </div>
             </li>
           ))}

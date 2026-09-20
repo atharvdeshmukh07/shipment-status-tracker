@@ -30,7 +30,7 @@ const EMPTY: Draft = {
 }
 
 const inputClass =
-  'mt-1.5 w-full rounded-md border border-ink-300 bg-white px-3 py-1.5 text-sm text-ink-900 shadow-sm placeholder:text-ink-400 focus:border-ink-700 focus:outline-none focus:ring-1 focus:ring-ink-700'
+  'mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-body shadow-sm placeholder:text-faint focus:border-muted focus:outline-none focus:ring-1 focus:ring-muted'
 
 // Three groups, because that is the order the desk actually gets the
 // information in: whose job it is, where the box is going, and the paperwork
@@ -38,10 +38,10 @@ const inputClass =
 // order at all.
 function Section({ title, note, children }: { title: string; note: string; children: ReactNode }) {
   return (
-    <section className="border-t border-ink-100 px-5 py-5 first:border-t-0">
+    <section className="border-t border-hair px-5 py-5 first:border-t-0">
       <div className="mb-4">
-        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-ink-700">{title}</h2>
-        <p className="mt-0.5 text-xs text-ink-500">{note}</p>
+        <h2 className="text-[11px] font-semibold uppercase tracking-wider text-body">{title}</h2>
+        <p className="mt-0.5 text-xs text-muted">{note}</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">{children}</div>
     </section>
@@ -62,13 +62,13 @@ function Row({
   return (
     <label className="block">
       <span className="flex items-baseline gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-600">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">
           {label}
         </span>
-        {required && <span className="text-[10px] uppercase text-ink-400">required</span>}
+        {required && <span className="text-[10px] uppercase text-faint">required</span>}
       </span>
       {children}
-      {hint && <span className="mt-1.5 block text-xs text-ink-500">{hint}</span>}
+      {hint && <span className="mt-1.5 block text-xs text-muted">{hint}</span>}
     </label>
   )
 }
@@ -106,10 +106,10 @@ export function NewShipment() {
 
   return (
     <form onSubmit={submit} className="max-w-3xl">
-      <div className="overflow-hidden rounded-lg border border-ink-200 bg-white shadow-sm">
-        <div className="border-b border-ink-200 bg-ink-900 px-5 py-4 text-white">
+      <div className="overflow-hidden rounded-lg border border-line bg-surface shadow-sm">
+        <div className="border-b border-line bg-chrome px-5 py-4 text-on-chrome">
           <h1 className="text-base font-semibold tracking-tight">Open a file</h1>
-          <p className="mt-0.5 text-sm text-ink-300">
+          <p className="mt-0.5 text-sm text-on-chrome/60">
             It starts at Booked, and that counts as the first entry in its history.
           </p>
         </div>
@@ -219,17 +219,17 @@ export function NewShipment() {
           </Row>
         </Section>
 
-        <div className="border-t border-ink-200 bg-ink-50 px-5 py-4">
+        <div className="border-t border-line bg-raised px-5 py-4">
           <ErrorNote error={create.error} />
 
           <div className="mt-3 flex items-center justify-end gap-4 first:mt-0">
-            <Link to="/" className="text-sm text-ink-600 hover:text-ink-900">
+            <Link to="/" className="text-sm text-muted hover:text-body">
               Cancel
             </Link>
             <button
               type="submit"
               disabled={create.isPending}
-              className="rounded-md bg-ink-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-ink-800 disabled:opacity-40"
+              className="rounded-md bg-action px-4 py-2 text-sm font-medium text-on-action shadow-sm transition hover:bg-action-2 disabled:opacity-40"
             >
               {create.isPending ? 'Opening…' : 'Open the file'}
             </button>

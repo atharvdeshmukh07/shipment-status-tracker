@@ -1,33 +1,81 @@
 @import "tailwindcss";
 
+/* Manual switch rather than prefers-color-scheme alone, because somebody on a
+   dark laptop at a bright desk wants to override what the OS assumes. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* Tailwind 4 takes its theme from here. There is no tailwind.config file in
    this version and adding one does nothing, which is a confusing hour to lose.
 
-   The ink scale is the chrome — header, buttons, borders, type. It is deep and
-   desaturated on purpose, because the only things on this screen allowed to
-   mean something by their colour are the six status tones, and a brand colour
-   competing with those would make a held file harder to spot, not easier. */
+   These are named for the job they do rather than the colour they are, so the
+   two themes swap underneath without every component knowing about it. */
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-ink-950: #071620;
-  --color-ink-900: #0b2130;
-  --color-ink-800: #113148;
-  --color-ink-700: #1b4661;
-  --color-ink-600: #4c6f85;
-  --color-ink-500: #6b8b9e;
-  --color-ink-400: #8da9b8;
-  --color-ink-300: #b4c8d3;
-  --color-ink-200: #d2e0e8;
-  --color-ink-100: #e6eff3;
-  --color-ink-50: #f2f7f9;
+  --color-page: var(--c-page);
+  --color-surface: var(--c-surface);
+  --color-raised: var(--c-raised);
+  --color-line: var(--c-line);
+  --color-hair: var(--c-hair);
+  --color-body: var(--c-body);
+  --color-muted: var(--c-muted);
+  --color-faint: var(--c-faint);
+  --color-chrome: var(--c-chrome);
+  --color-chrome-2: var(--c-chrome-2);
+  --color-on-chrome: var(--c-on-chrome);
+  --color-action: var(--c-action);
+  --color-action-2: var(--c-action-2);
+  --color-on-action: var(--c-on-action);
+}
 
-  --color-page: #eef3f6;
+/* Light: paper on a desk. The header is the darkest thing on screen and sits
+   in front of everything else. */
+:root {
+  --c-page: #eef3f6;
+  --c-surface: #ffffff;
+  --c-raised: #f2f7f9;
+  --c-line: #d2e0e8;
+  --c-hair: #e6eff3;
+  --c-body: #0b2130;
+  --c-muted: #4c6f85;
+  --c-faint: #8da9b8;
+  --c-chrome: #0b2130;
+  --c-chrome-2: #113148;
+  --c-on-chrome: #ffffff;
+  --c-action: #0b2130;
+  --c-action-2: #113148;
+  --c-on-action: #ffffff;
+}
+
+/* Dark is chosen, not flipped. Two things deliberately reverse rather than
+   invert: the header becomes the darkest surface and sits *behind* the cards
+   instead of in front of them, and the primary button goes pale, because a
+   near-black button on a near-black page is not a button. */
+[data-theme="dark"] {
+  --c-page: #060f16;
+  --c-surface: #0e1c27;
+  --c-raised: #142633;
+  --c-line: #22394b;
+  --c-hair: #1a2d3b;
+  --c-body: #e6eff3;
+  --c-muted: #93aebd;
+  --c-faint: #5f7d90;
+  --c-chrome: #030a10;
+  --c-chrome-2: #0e1c27;
+  --c-on-chrome: #e6eff3;
+  --c-action: #e6eff3;
+  --c-action-2: #ffffff;
+  --c-on-action: #071119;
 }
 
 html {
-  background-color: var(--color-page);
-  color: var(--color-ink-900);
+  background-color: var(--c-page);
+  color: var(--c-body);
   -webkit-font-smoothing: antialiased;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
 }
