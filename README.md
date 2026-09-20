@@ -118,6 +118,11 @@ cp .env.example .env          # VITE_API_URL=http://localhost:4000
 npm run dev                   # :5173
 ```
 
+There is a `docker-compose.yml` at the root that spins up a Postgres container
+if you would rather not use a hosted one. I developed against Neon and did not
+run the compose file, so treat it as a convenience rather than a tested path —
+the `.env.example` values match it.
+
 **Checks**
 
 ```bash
@@ -163,7 +168,25 @@ tell them apart to know whether retrying is worth anything.
   third table.
 - Times are stored as `timestamptz` and shown in the reader's own timezone.
 
-## If it had to scale
+## 10,000 shipments and several people on it at once
+
+Nothing about the shape changes. The two-table design and the version column
+were both chosen with this in mind, and at ten thousand rows Postgres is not
+breathing hard — what gives first is the offset pagination, which gets slower
+the deeper you page, so I would move the board to keyset pagination on
+`(created_at, id)`; the tiebreak is already in the `ORDER BY` for exactly that
+reason. The four filtered counts along the top would become one `GROUP BY
+current_status`, cached for a few seconds, rather than four round trips per
+page load. Concurrent writes are already handled honestly: two people moving
+the same file both send the version they read, the second one loses in the
+`WHERE` clause and is told so rather than silently overwriting the first —
+that is the part most implementations get wrong and it costs nothing to get
+right up front. Beyond that I would put the event table on a monthly partition
+since it only ever grows, move Render off the free tier so it stops sleeping,
+and run the API on more than one instance, which it already tolerates because
+it holds no state between requests.
+
+## The rest of it, in more detail
 
 The board and the search are the first things to feel it. `reference_key` and
 `house_bl_no` already carry `text_pattern_ops` indexes so prefix search uses
