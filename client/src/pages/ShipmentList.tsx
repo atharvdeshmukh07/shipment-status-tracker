@@ -1,18 +1,18 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import { useCount, useShipments, type ListFilters } from '../api/shipments'
-import type { Stage } from '../api/types'
-import { STAGE_EDGE, STAGE_LABEL } from '../lib/status'
-import { etaNote, shortDate } from '../lib/format'
-import { StatusBadge } from '../components/StatusBadge'
-import { ErrorNote } from '../components/ErrorNote'
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useCount, useShipments, type ListFilters } from "../api/shipments";
+import type { Stage } from "../api/types";
+import { STAGE_EDGE, STAGE_LABEL } from "../lib/status";
+import { etaNote, shortDate } from "../lib/format";
+import { StatusBadge } from "../components/StatusBadge";
+import { ErrorNote } from "../components/ErrorNote";
 
-const PAGE = 15
+const PAGE = 15;
 
-const ALL_STAGES = Object.keys(STAGE_LABEL) as Stage[]
+const ALL_STAGES = Object.keys(STAGE_LABEL) as Stage[];
 
 const FIELD =
-  'rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-body shadow-sm placeholder:text-faint focus:border-muted focus:outline-none focus:ring-1 focus:ring-muted'
+  "rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-body shadow-sm placeholder:text-faint focus:border-muted focus:outline-none focus:ring-1 focus:ring-muted";
 
 // The number stays in body ink and the label is always written out. The dot
 // carries the status, so nothing here rests on telling amber from red — those
@@ -25,18 +25,20 @@ function Tally({
   active,
   onPick,
 }: {
-  label: string
-  count: number | undefined
-  dot?: string
-  active: boolean
-  onPick: () => void
+  label: string;
+  count: number | undefined;
+  dot?: string;
+  active: boolean;
+  onPick: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onPick}
       className={`flex-1 rounded-xl border bg-surface px-4 py-3.5 text-left shadow-sm transition ${
-        active ? 'border-body ring-1 ring-body' : 'border-line hover:border-muted'
+        active
+          ? "border-body ring-1 ring-body"
+          : "border-line hover:border-muted"
       }`}
     >
       <span className="flex items-center gap-1.5">
@@ -46,96 +48,109 @@ function Tally({
         </span>
       </span>
       <span className="mt-1.5 block text-[28px] font-semibold leading-none tabular-nums text-body">
-        {count ?? '·'}
+        {count ?? "·"}
       </span>
     </button>
-  )
+  );
 }
 
 export function ShipmentList() {
   const [filters, setFilters] = useState<ListFilters>({
-    status: '',
-    q: '',
+    status: "",
+    q: "",
     limit: PAGE,
     offset: 0,
-  })
+  });
 
-  const { data, error, isPending } = useShipments(filters)
+  const { data, error, isPending } = useShipments(filters);
 
-  const onBook = useCount(null)
-  const moving = useCount('IN_TRANSIT')
-  const held = useCount('CUSTOMS_HOLD')
-  const broken = useCount('EXCEPTION')
+  const onBook = useCount(null);
+  const moving = useCount("IN_TRANSIT");
+  const held = useCount("CUSTOMS_HOLD");
+  const broken = useCount("EXCEPTION");
 
   // Any change to what is being looked for sends you back to page one. Staying
   // on page three of a search you just replaced shows an empty table, which
   // reads as "nothing matched" when it isn't.
   function narrow(change: Partial<ListFilters>) {
-    setFilters((current) => ({ ...current, ...change, offset: 0 }))
+    setFilters((current) => ({ ...current, ...change, offset: 0 }));
   }
 
-  function pick(status: Stage | '') {
-    narrow({ status: filters.status === status ? '' : status })
+  function pick(status: Stage | "") {
+    narrow({ status: filters.status === status ? "" : status });
   }
 
-  const total = data?.pagination.total ?? 0
-  const firstOnPage = total === 0 ? 0 : filters.offset + 1
-  const lastOnPage = Math.min(filters.offset + PAGE, total)
+  const total = data?.pagination.total ?? 0;
+  const firstOnPage = total === 0 ? 0 : filters.offset + 1;
+  const lastOnPage = Math.min(filters.offset + PAGE, total);
 
   // Two permanently greyed-out buttons read as broken, not as "there is only
   // one page". So when everything fits, the controls are not there at all.
-  const paged = total > PAGE
+  const paged = total > PAGE;
 
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-[22px] font-semibold tracking-tight text-body">The board</h1>
-        <p className="mt-0.5 text-sm text-muted">
-          Every import file currently open, and where each one has got to.
-        </p>
+        <h1 className="text-[22px] font-semibold tracking-tight text-body">
+          The board
+        </h1>
       </div>
 
       <div className="flex flex-wrap gap-3">
         <Tally
           label="On the book"
           count={onBook.data}
-          active={filters.status === ''}
-          onPick={() => pick('')}
+          active={filters.status === ""}
+          onPick={() => pick("")}
         />
         <Tally
           label="In transit"
           count={moving.data}
           dot="bg-sky-500"
-          active={filters.status === 'IN_TRANSIT'}
-          onPick={() => pick('IN_TRANSIT')}
+          active={filters.status === "IN_TRANSIT"}
+          onPick={() => pick("IN_TRANSIT")}
         />
         <Tally
           label="Customs hold"
           count={held.data}
           dot="bg-amber-500"
-          active={filters.status === 'CUSTOMS_HOLD'}
-          onPick={() => pick('CUSTOMS_HOLD')}
+          active={filters.status === "CUSTOMS_HOLD"}
+          onPick={() => pick("CUSTOMS_HOLD")}
         />
         <Tally
           label="Exception"
           count={broken.data}
           dot="bg-red-500"
-          active={filters.status === 'EXCEPTION'}
-          onPick={() => pick('EXCEPTION')}
+          active={filters.status === "EXCEPTION"}
+          onPick={() => pick("EXCEPTION")}
         />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <input
-          value={filters.q}
-          onChange={(event) => narrow({ q: event.target.value })}
-          placeholder="Reference or house B/L"
-          className={`w-72 ${FIELD}`}
-        />
+        <div className="relative w-full sm:w-96">
+          <svg
+            viewBox="0 0 24 24"
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-faint"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <circle cx="11" cy="11" r="7" />
+            <path strokeLinecap="round" d="m20 20-3.5-3.5" />
+          </svg>
+          <input
+            value={filters.q}
+            onChange={(event) => narrow({ q: event.target.value })}
+            placeholder="Search by reference or house B/L"
+            className="w-full rounded-md border border-line bg-surface py-2.5 pl-9 pr-3 text-sm text-body shadow-sm placeholder:text-faint focus:border-body focus:outline-none focus:ring-2 focus:ring-body/20"
+          />
+        </div>
 
         <select
           value={filters.status}
-          onChange={(event) => narrow({ status: event.target.value as Stage | '' })}
+          onChange={(event) =>
+            narrow({ status: event.target.value as Stage | "" })
+          }
           className={FIELD}
         >
           <option value="">Any status</option>
@@ -148,10 +163,10 @@ export function ShipmentList() {
 
         <span className="text-sm text-muted">
           {total === 0
-            ? 'No files'
+            ? "No files"
             : paged
-              ? `${firstOnPage}–${lastOnPage} of ${total}`
-              : `${total} ${total === 1 ? 'file' : 'files'}`}
+            ? `${firstOnPage}–${lastOnPage} of ${total}`
+            : `${total} ${total === 1 ? "file" : "files"}`}
         </span>
       </div>
 
@@ -187,15 +202,16 @@ export function ShipmentList() {
                 // does not get a countdown shouting at whoever is scanning down
                 // the column.
                 const settled =
-                  shipment.currentStatus === 'DELIVERED' ||
-                  shipment.currentStatus === 'CANCELLED'
-                const due = settled ? null : etaNote(shipment.eta)
+                  shipment.currentStatus === "DELIVERED" ||
+                  shipment.currentStatus === "CANCELLED";
+                const due = settled ? null : etaNote(shipment.eta);
 
                 return (
                   <tr
                     key={shipment.id}
                     className={`border-b border-l-2 border-b-hair last:border-b-0 hover:bg-raised ${
-                      STAGE_EDGE[shipment.currentStatus] ?? 'border-l-transparent'
+                      STAGE_EDGE[shipment.currentStatus] ??
+                      "border-l-transparent"
                     }`}
                   >
                     <td className="py-3 pl-4 pr-3">
@@ -206,7 +222,7 @@ export function ShipmentList() {
                         {shipment.referenceNo}
                       </Link>
                       <div className="font-mono text-[11px] text-faint">
-                        {shipment.houseBlNo ?? '—'}
+                        {shipment.houseBlNo ?? "—"}
                       </div>
                     </td>
                     <td className="px-3 py-3 text-body">
@@ -214,18 +230,22 @@ export function ShipmentList() {
                         {shipment.originPort} → {shipment.destinationPort}
                       </span>
                       <div className="text-[11px] uppercase tracking-wider text-faint">
-                        {shipment.mode.replace('_', ' ')}
+                        {shipment.mode.replace("_", " ")}
                       </div>
                     </td>
-                    <td className="px-3 py-3 font-medium text-body">{shipment.consignee}</td>
+                    <td className="px-3 py-3 font-medium text-body">
+                      {shipment.consignee}
+                    </td>
                     <td className="px-3 py-3 text-body">
-                      <span className="tabular-nums">{shortDate(shipment.eta)}</span>
+                      <span className="tabular-nums">
+                        {shortDate(shipment.eta)}
+                      </span>
                       {due && (
                         <div
                           className={`text-[11px] ${
-                            due.includes('late')
-                              ? 'font-medium text-red-600 dark:text-red-400'
-                              : 'text-faint'
+                            due.includes("late")
+                              ? "font-medium text-red-600 dark:text-red-400"
+                              : "text-faint"
                           }`}
                         >
                           {due}
@@ -236,7 +256,7 @@ export function ShipmentList() {
                       <StatusBadge stage={shipment.currentStatus} />
                     </td>
                   </tr>
-                )
+                );
               })}
             </tbody>
           </table>
@@ -260,7 +280,12 @@ export function ShipmentList() {
           </button>
           <button
             type="button"
-            onClick={() => setFilters((current) => ({ ...current, offset: current.offset + PAGE }))}
+            onClick={() =>
+              setFilters((current) => ({
+                ...current,
+                offset: current.offset + PAGE,
+              }))
+            }
             disabled={lastOnPage >= total}
             className="rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-body shadow-sm transition hover:border-muted disabled:opacity-40 disabled:hover:border-line"
           >
@@ -269,5 +294,5 @@ export function ShipmentList() {
         </div>
       )}
     </div>
-  )
+  );
 }
