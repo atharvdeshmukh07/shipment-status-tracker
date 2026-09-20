@@ -8,10 +8,10 @@ than only its current state.
 
 **Live**
 
-| | |
-|---|---|
-| Web | https://shipment-status-tracker-five.vercel.app |
-| API | https://shipment-tracker-api-gpkw.onrender.com |
+|        |                                                       |
+| ------ | ----------------------------------------------------- |
+| Web    | https://shipment-status-tracker-five.vercel.app       |
+| API    | https://shipment-tracker-api-gpkw.onrender.com        |
 | Health | https://shipment-tracker-api-gpkw.onrender.com/health |
 
 The API is on Render's free tier, which sleeps after fifteen minutes idle. The
@@ -46,7 +46,7 @@ with three that sit off that line:
 - **CANCELLED** — only before the goods are in transit
 
 Every transition is checked server-side. An illegal move comes back `409` with
-the list of moves that *are* legal from where the file actually is, and the UI
+the list of moves that _are_ legal from where the file actually is, and the UI
 builds its dropdown from that list, so it never offers something that will be
 refused. `CUSTOMS_HOLD` and `EXCEPTION` require a reason.
 
@@ -74,16 +74,16 @@ Two other columns earn their place:
 
 ## Stack and why
 
-| | | |
-|---|---|---|
-| API | Express 5, TypeScript | Express 5 forwards rejected promises to the error handler itself, so the routes have no try/catch that only rethrows |
-| Validation | Zod | One schema validates the body and types it, so the two cannot drift apart |
-| Database | PostgreSQL on Neon | Free tier, and the transaction guarantees the two-table write depends on |
-| ORM | Prisma 6 | Typed queries; the list endpoint drops to raw SQL where the filter/search/sort combination is clearer written out |
-| Web | React 19, Vite, TypeScript | |
-| Data fetching | TanStack Query | Cache invalidation after a mutation without hand-rolling it |
-| Styling | Tailwind 4 | Theme lives in a `@theme` block in CSS — there is no config file in v4 |
-| Hosting | Render (API), Vercel (web) | Separate platforms, as asked |
+|               |                            |                                                                                                                      |
+| ------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| API           | Express 5, TypeScript      | Express 5 forwards rejected promises to the error handler itself, so the routes have no try/catch that only rethrows |
+| Validation    | Zod                        | One schema validates the body and types it, so the two cannot drift apart                                            |
+| Database      | PostgreSQL on Neon         | Free tier, and the transaction guarantees the two-table write depends on                                             |
+| ORM           | Prisma 6                   | Typed queries; the list endpoint drops to raw SQL where the filter/search/sort combination is clearer written out    |
+| Web           | React 19, Vite, TypeScript |                                                                                                                      |
+| Data fetching | TanStack Query             | Cache invalidation after a mutation without hand-rolling it                                                          |
+| Styling       | Tailwind 4                 | Theme lives in a `@theme` block in CSS — there is no config file in v4                                               |
+| Hosting       | Render (API), Vercel (web) | Separate platforms, as asked                                                                                         |
 
 ## Running it locally
 
@@ -118,6 +118,15 @@ cp .env.example .env          # VITE_API_URL=http://localhost:4000
 npm run dev                   # :5173
 ```
 
+**Windows**
+
+The commands above assume a Unix-style shell. In PowerShell or Git Bash they
+work as written. In plain `cmd.exe`, `cp` is the one thing that doesn't
+exist — use `copy .env.example .env` instead, in both `server` and `client`.
+Everything else here (`git`, `npm`, `npx`, `curl`) is a Node or system tool
+and runs the same on Windows, macOS and Linux once Node 22 and a Postgres
+connection string are in place.
+
 There is a `docker-compose.yml` at the root that spins up a Postgres container
 if you would rather not use a hosted one. I developed against Neon and did not
 run the compose file, so treat it as a convenience rather than a tested path —
@@ -140,13 +149,13 @@ with no reason, a stale version, and a duplicate reference.
 
 Base: `/api/v1`
 
-| | | |
-|---|---|---|
-| `POST` | `/shipments` | Open a file. `409` on a duplicate reference |
-| `GET` | `/shipments` | `?status=` `?q=` `?limit=` `?offset=` `?sort=` `?dir=` |
-| `GET` | `/shipments/:id` | Includes `nextStatuses` — the moves legal from here |
-| `GET` | `/shipments/:id/events` | Full history, oldest first |
-| `POST` | `/shipments/:id/status` | Move it. Needs `expectedVersion` |
+|        |                         |                                                        |
+| ------ | ----------------------- | ------------------------------------------------------ |
+| `POST` | `/shipments`            | Open a file. `409` on a duplicate reference            |
+| `GET`  | `/shipments`            | `?status=` `?q=` `?limit=` `?offset=` `?sort=` `?dir=` |
+| `GET`  | `/shipments/:id`        | Includes `nextStatuses` — the moves legal from here    |
+| `GET`  | `/shipments/:id/events` | Full history, oldest first                             |
+| `POST` | `/shipments/:id/status` | Move it. Needs `expectedVersion`                       |
 
 Errors come back in one shape, with a code the client can act on rather than a
 stack trace: `VALIDATION_FAILED` (422), `NOT_FOUND` (404),
@@ -201,7 +210,7 @@ Past that:
   and over a year old to cold storage. Nothing reads old events except the
   detail page.
 - **The counts on the board** are four filtered counts today. One `GROUP BY
-  current_status` replaces them the moment that stops being cheap.
+current_status` replaces them the moment that stops being cheap.
 - **Write contention** is already handled by the version column, and it degrades
   honestly — the loser is told, rather than silently losing their change.
 - **Status changes want to notify.** The event table is the natural outbox; a
