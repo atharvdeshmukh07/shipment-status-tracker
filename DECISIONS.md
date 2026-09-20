@@ -27,3 +27,19 @@ Also noticed Prisma flags that same index migration as drift every time
 `migrate dev` runs, because `text_pattern_ops` isn't something the schema
 file can express — it only exists as raw SQL. Expected, not a bug. Declining
 the prompt to generate a reconciling migration when it comes up.
+
+API is on Render, free tier, Singapore so it sits next to the Neon database.
+Build runs migrate deploy before tsc, so the schema is never behind the code
+that expects it.
+
+Two things that had to be right. Root directory points at `server`, or Render
+looks for a package.json at the top of the repo and finds nothing. And the
+build needs dev dependencies explicitly, because typescript is a dev
+dependency and without it there is no tsc to build with.
+
+Free tier sleeps after fifteen minutes, so the first request after a quiet
+spell takes about a minute to answer. Fine here, would not be fine for a desk
+that actually depends on it.
+
+Added a route at / after pasting the bare URL into a browser myself and
+getting the 404 handler. It was working correctly, but it reads as down.
