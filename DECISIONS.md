@@ -1,7 +1,5 @@
 Notes to myself while building this. Newest at the bottom.
 
-## 19 Sep, evening
-
 Two tables, not one. Thought about keeping a `status` column on the shipment
 and a history table that only records changes, but then the first status has no
 row in it and the timeline starts out empty, which looks broken. So creation
@@ -43,3 +41,12 @@ that actually depends on it.
 
 Added a route at / after pasting the bare URL into a browser myself and
 getting the 404 handler. It was working correctly, but it reads as down.
+
+Web is on Vercel, API on Render, two platforms as asked. The SPA rewrite in
+vercel.json matters more than it looks — without it, refreshing on a shipment
+detail page 404s, because there is no file at that path and Vercel does not
+know the router owns it.
+
+CORS needed no change in the end. The API already allows any \*.vercel.app
+origin, which was put in for preview builds and happens to cover the
+production hostname too.
