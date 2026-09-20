@@ -53,9 +53,9 @@
    instead of in front of them, and the primary button goes pale, because a
    near-black button on a near-black page is not a button. */
 [data-theme="dark"] {
-  --c-page: #060f16;
-  --c-surface: #0e1c27;
-  --c-raised: #142633;
+  --c-page: #0a141c;
+  --c-surface: #101f2b;
+  --c-raised: #172a38;
   --c-line: #22394b;
   --c-hair: #1a2d3b;
   --c-body: #e6eff3;
@@ -74,6 +74,13 @@ html {
   color: var(--c-body);
   -webkit-font-smoothing: antialiased;
   color-scheme: light;
+}
+
+/* Inter's default figures are proportional, which makes a column of dates
+   ragged. These two features line the digits up and give the zero a slash so it
+   cannot be read as an O in a reference number. */
+body {
+  font-feature-settings: "tnum" 1, "zero" 1;
 }
 
 [data-theme="dark"] {

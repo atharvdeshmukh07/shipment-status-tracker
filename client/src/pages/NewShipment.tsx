@@ -106,9 +106,9 @@ export function NewShipment() {
 
   return (
     <form onSubmit={submit} className="max-w-3xl">
-      <div className="overflow-hidden rounded-lg border border-line bg-surface shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
         <div className="border-b border-line bg-chrome px-5 py-4 text-on-chrome">
-          <h1 className="text-base font-semibold tracking-tight">Open a file</h1>
+          <h1 className="text-[20px] font-semibold tracking-tight">Open a file</h1>
           <p className="mt-0.5 text-sm text-on-chrome/60">
             It starts at Booked, and that counts as the first entry in its history.
           </p>

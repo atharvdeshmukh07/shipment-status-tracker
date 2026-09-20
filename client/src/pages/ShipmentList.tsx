@@ -35,7 +35,7 @@ function Tally({
     <button
       type="button"
       onClick={onPick}
-      className={`flex-1 rounded-lg border bg-surface px-4 py-3 text-left shadow-sm transition ${
+      className={`flex-1 rounded-xl border bg-surface px-4 py-3.5 text-left shadow-sm transition ${
         active ? 'border-body ring-1 ring-body' : 'border-line hover:border-muted'
       }`}
     >
@@ -88,6 +88,13 @@ export function ShipmentList() {
 
   return (
     <div className="space-y-5">
+      <div>
+        <h1 className="text-[22px] font-semibold tracking-tight text-body">The board</h1>
+        <p className="mt-0.5 text-sm text-muted">
+          Every import file currently open, and where each one has got to.
+        </p>
+      </div>
+
       <div className="flex flex-wrap gap-3">
         <Tally
           label="On the book"
@@ -155,15 +162,15 @@ export function ShipmentList() {
           Loading. If the API has been idle this can take a minute to wake up.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-line bg-surface shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-line bg-raised text-[11px] font-semibold uppercase tracking-wider text-muted">
               <tr>
-                <th className="py-2.5 pl-4 pr-3">Reference</th>
-                <th className="px-3 py-2.5">Lane</th>
-                <th className="px-3 py-2.5">Consignee</th>
-                <th className="px-3 py-2.5">ETA</th>
-                <th className="px-3 py-2.5">Status</th>
+                <th className="py-3 pl-4 pr-3">Reference</th>
+                <th className="px-3 py-3">Lane</th>
+                <th className="px-3 py-3">Consignee</th>
+                <th className="px-3 py-3">ETA</th>
+                <th className="px-3 py-3">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -191,10 +198,10 @@ export function ShipmentList() {
                       STAGE_EDGE[shipment.currentStatus] ?? 'border-l-transparent'
                     }`}
                   >
-                    <td className="py-2.5 pl-4 pr-3">
+                    <td className="py-3 pl-4 pr-3">
                       <Link
                         to={`/shipments/${shipment.id}`}
-                        className="font-mono text-[13px] font-medium text-body hover:underline"
+                        className="font-mono text-[14px] font-medium text-body hover:underline"
                       >
                         {shipment.referenceNo}
                       </Link>
@@ -202,7 +209,7 @@ export function ShipmentList() {
                         {shipment.houseBlNo ?? '—'}
                       </div>
                     </td>
-                    <td className="px-3 py-2.5 text-body">
+                    <td className="px-3 py-3 text-body">
                       <span className="font-mono text-[13px]">
                         {shipment.originPort} → {shipment.destinationPort}
                       </span>
@@ -210,8 +217,8 @@ export function ShipmentList() {
                         {shipment.mode.replace('_', ' ')}
                       </div>
                     </td>
-                    <td className="px-3 py-2.5 text-body">{shipment.consignee}</td>
-                    <td className="px-3 py-2.5 text-body">
+                    <td className="px-3 py-3 font-medium text-body">{shipment.consignee}</td>
+                    <td className="px-3 py-3 text-body">
                       <span className="tabular-nums">{shortDate(shipment.eta)}</span>
                       {due && (
                         <div
@@ -225,7 +232,7 @@ export function ShipmentList() {
                         </div>
                       )}
                     </td>
-                    <td className="px-3 py-2.5">
+                    <td className="px-3 py-3">
                       <StatusBadge stage={shipment.currentStatus} />
                     </td>
                   </tr>

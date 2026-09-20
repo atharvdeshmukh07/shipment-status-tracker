@@ -84,10 +84,10 @@ export function ShipmentDetail() {
         ← All files
       </Link>
 
-      <div className="overflow-hidden rounded-lg border border-line bg-surface shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-line bg-surface shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3 px-5 pt-5">
           <div>
-            <h1 className="font-mono text-lg font-semibold tracking-tight text-body">
+            <h1 className="font-mono text-[22px] font-semibold tracking-tight text-body">
               {file.referenceNo}
             </h1>
             <p className="mt-0.5 text-sm text-muted">
@@ -136,7 +136,7 @@ export function ShipmentDetail() {
         </dl>
       </div>
 
-      <div className="rounded-lg border border-line bg-surface p-5 shadow-sm">
+      <div className="rounded-xl border border-line bg-surface p-5 shadow-sm">
         <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted">
           Move this file
         </h2>
@@ -194,7 +194,7 @@ export function ShipmentDetail() {
         )}
       </div>
 
-      <div className="rounded-lg border border-line bg-surface p-5 shadow-sm">
+      <div className="rounded-xl border border-line bg-surface p-5 shadow-sm">
         <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted">History</h2>
 
         {events.isPending && <p className="mt-3 text-sm text-muted">Loading.</p>}
