@@ -6,7 +6,7 @@ Tracks import shipments through the stages a freight forwarder actually moves
 them through, keeping the full history of how each file got where it is rather
 than only its current state.
 
-**Live**
+**Live Links**
 
 |        |                                                       |
 | ------ | ----------------------------------------------------- |
