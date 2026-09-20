@@ -41,6 +41,15 @@ app.get("/health", async (_req, res) => {
     res.status(503).json({ ok: false, db: "unreachable" });
   }
 });
+// Anyone handed this URL pastes it into a browser before anything else. A 404
+// there reads as broken even though it isn't, so point them at what exists.
+app.get("/", (_req, res) => {
+  res.json({
+    service: "shipment-status-tracker-api",
+    health: "/health",
+    shipments: "/api/v1/shipments",
+  });
+});
 
 app.use("/api/v1/shipments", shipmentRoutes);
 
